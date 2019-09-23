@@ -1,6 +1,9 @@
 # SSESTM
-* experimental project for study. 
-* For now, the data amount scalability is not considered. (Will be improved in near future)
+* Implementation of the model in https://bfi.uchicago.edu/wp-content/uploads/BFI_WP_201969.pdf
+* Experimental project on study purpose. 
+* For now, the data amount scalability is not considered,
+which means you may suffer memory, time complexity issues or bugs.
+(Any contribution for this will be appreciated so much.)
 
 # Installation
 How to use with Anaconda environment (Recommended)
