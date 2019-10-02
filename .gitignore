@@ -2,3 +2,4 @@ data/
 .idea/
 .ipynb_checkpoints/
 input
+__pycache__/

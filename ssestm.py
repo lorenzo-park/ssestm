@@ -16,6 +16,7 @@ from nltk.stem import WordNetLemmatizer
 from tqdm import tqdm
 
 import numpy as np
+import pandas as pd
 
 
 logging.basicConfig(format='[%(levelname)s] %(message)s', level=logging.DEBUG)
@@ -60,19 +61,23 @@ class SSESTM:
         codes = []
         returns = []
         articles = []
-        with open(path, "r") as fin:
-            rdr = csv.reader(fin)
-            for idx, line in tqdm(enumerate(rdr)):
-                if idx == 0:
-                    continue
-                if idx == 923:
-                    break
-                codes.append(line[0])
-                try:
-                    returns.append(float(line[5])*100)
-                    articles.append(line[7])
-                except:
-                    print(line[3])
+        df = pd.read_excel(path)
+
+        for idx, row in df.iterrows():
+            if idx == 0:
+                continue
+            try:
+                returns.append(float(row["Return2"]) * 100)
+            except:
+                print(idx)
+                continue
+
+            try:
+                articles.append(row["Content"])
+            except:
+                returns.pop()
+                print(idx)
+
         self.codes = codes
         self.returns = returns
         self.articles = articles
@@ -80,9 +85,13 @@ class SSESTM:
     def _preprocess(self):
         logging.info("Preprocessing...")
         articles_words = []
-        for article in tqdm(self.articles):
-            articles_words.append(self.preprocess_article(article))
+        returns = []
+        for idx, article in enumerate(tqdm(self.articles)):
+            if not pd.isna(article):
+                articles_words.append(self.preprocess_article(article))
+                returns.append(self.returns[idx])
         self.articles_words = articles_words
+        self.returns = returns
         word_set = []
         for article_words in articles_words:
             for word in article_words:
@@ -100,6 +109,7 @@ class SSESTM:
                     total_cnt += 1
                     if self.returns[jdx] > 0:
                         positive_cnt += 1
+
             if total_cnt > self.kappa:
                 fj = positive_cnt / total_cnt
                 if fj >= 1/2 + self.alpha_plus:
@@ -110,6 +120,12 @@ class SSESTM:
                     # Negative sentiment terms
                     self.S.append(word)
                     self.S_count.append(total_cnt)
+
+        for jdx, article_words in enumerate(tqdm(self.articles_words)):
+            total_cnt = 0
+            for word in self.S:
+                if word in article_words:
+                    total_cnt += 1
             self.articles_words_count.append(total_cnt)
 
     def _calc_topic(self):
@@ -125,6 +141,9 @@ class SSESTM:
         for idx, article_words in enumerate(self.articles_words):
             di = []
             for word in self.S:
+                if self.articles_words_count[idx] == 0:
+                    di.append(0)
+                    continue
                 di.append(article_words.count(word) / self.articles_words_count[idx])
             d.append(np.array(di, dtype=float))
         d = np.array(d, dtype=float)
@@ -216,6 +235,7 @@ class SSESTM:
         return total_sum / len(s_words) + self.reg * (2 * p - 1) / (p * (1 - p))
 
     def preprocess_article(self, article):
+
         # Remove numbers
         article = re.sub(r'\d+', '', article.lower())
 
