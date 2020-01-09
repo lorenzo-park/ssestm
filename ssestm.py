@@ -93,7 +93,7 @@ class SSESTM:
         self.articles_words = articles_words
         self.returns = returns
         word_set = []
-        for article_words in articles_words:
+        for article_words in tqdm(articles_words):
             for word in article_words:
                 if word not in word_set:
                     word_set.append(word)
@@ -132,7 +132,7 @@ class SSESTM:
         logging.info("Calculating topic matrix...")
         p = []
         n = len(self.articles_words)
-        for rank in rankdata(self.returns):
+        for rank in tqdm(rankdata(self.returns)):
             p.append(rank / n)
         W = np.array([p, [1 - pi for pi in p]], dtype=float)
         WWT = W.dot(W.T)
