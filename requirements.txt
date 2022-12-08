@@ -1,4 +1,4 @@
-certifi==2019.6.16
+certifi==2022.12.7
 fire==0.2.1
 nltk==3.4.4
 numpy==1.17.0
@@ -10,7 +10,7 @@ appnope==0.1.0
 attrs==19.1.0
 backcall==0.1.0
 bleach==3.1.0
-certifi==2019.6.16
+certifi==2022.12.7
 cycler==0.10.0
 decorator==4.4.0
 defusedxml==0.6.0
